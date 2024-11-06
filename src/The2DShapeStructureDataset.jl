@@ -1,7 +1,6 @@
 module The2DShapeStructureDataset
 @doc read(joinpath(dirname(@__DIR__), "README.md"), String) The2DShapeStructureDataset
 
-
 using Downloads
 using ZipArchives
 using JSON3
