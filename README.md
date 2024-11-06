@@ -1,4 +1,4 @@
-# The2dShapeStructureDataset.jl
+# The2DShapeStructureDataset.jl
 
 This is a convenience package for working with
 [The 2D Shape Structure Dataset](https://2dshapesstructure.github.io/).
