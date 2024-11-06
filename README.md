@@ -1,5 +1,7 @@
 # The2DShapeStructureDataset.jl
 
+[![Static Badge](https://img.shields.io/badge/docs-main-blue)](https://microscopic-image-analysis.github.io/The2DShapeStructureDataset.jl/dev/)
+
 This is a convenience package for working with
 [The 2D Shape Structure Dataset](https://2dshapesstructure.github.io/).
 The dataset has the following copyright notice
