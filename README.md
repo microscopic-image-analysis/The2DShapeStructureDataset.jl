@@ -5,7 +5,9 @@
 This is a convenience package for working with
 [The 2D Shape Structure Dataset](https://2dshapesstructure.github.io/).
 The dataset has the following copyright notice
+
 > Copyright (c) [2016] [A. Carlier, K. Leonard, S. Hahmann, G. Morin, M. Collins]
+
 and is licensed under an MIT-License.
 
 The whole dataset is 1.8 MB large (zipped) and is only downloaded once when you
