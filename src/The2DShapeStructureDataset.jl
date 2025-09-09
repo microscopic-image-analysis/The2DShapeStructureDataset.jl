@@ -4,9 +4,6 @@ module The2DShapeStructureDataset
 using Downloads
 using ZipArchives
 using JSON3
-using Meshes
-using HybridArrays
-using Unitful
 
 export shape_names, shape_coords, shape_ring, shape_area,
     shape_sample_outline, shape_sample_inner
@@ -40,28 +37,30 @@ end
 """
     shape_coords(name)
 
-Returns a `2 ⨯ n` `HybridMatrix` with all coordinates of the shape with the
-given name.
+Returns a `2 ⨯ n` `Matrix` with all coordinates of the shape with the given
+name.
 Use [`shape_names`](@ref) to find all possible inputs for this function.
 
 ```julia
 julia> shape_coords("Bone-1")
-2×106 HybridArrays.HybridMatrix{2, StaticArraysCore.Dynamic(), Float64, 2, Matrix{Float64}} with indices SOneTo(2)×Base.OneTo(106):
- 0.34174  0.3578   0.37615  0.3922   0.40826  0.42431  0.44037  0.45642  0.47248  …  0.22477  0.24083  0.25688  0.27294  0.28899  0.30505  0.32339  0.33945  0.34174
- 0.5      0.52523  0.55046  0.57569  0.60092  0.62615  0.65138  0.67661  0.70183     0.31651  0.34174  0.36697  0.3922   0.41743  0.44266  0.46789  0.49312  0.5
+2×106 Matrix{Float64}:
+ 0.34174  0.3578   0.37615  …  0.32339  0.33945  0.34174
+ 0.5      0.52523  0.55046     0.46789  0.49312  0.5
 ```
 """
 function shape_coords(name)
     full_name = "Shapes/$(name).json"
     zip_entry = zip_readentry(ZIPPED_SHAPES, full_name)
     json = JSON3.read(zip_entry)
-    stack(json.points) do point
-        HybridVector{2}([point.x, point.y])
-    end
+    stack(point -> [point.x, point.y], json.points)
 end
 
 """
     shape_ring(name)
+
+!!! info
+    Requires the [`Meshes.jl`](https://github.com/JuliaGeometry/Meshes.jl)
+    package being loaded.
 
 Returns the same coordinates as [`shape_coords`](@ref) but as a `Ring` from
 `Meshes.jl`.
@@ -82,14 +81,14 @@ Ring
 └─ Point(x: 0.34174 m, y: 0.5 m)
 ```
 """
-function shape_ring(name)
-    coords = shape_coords(name)
-    points = map(col -> Point(col...), eachcol(coords))
-    Ring(points)
-end
+function shape_ring end
 
 """
     shape_area(name)
+
+!!! info
+    Requires the [`Meshes.jl`](https://github.com/JuliaGeometry/Meshes.jl)
+    package being loaded.
 
 Returns the same coordinates as [`shape_coords`](@ref) but as a `PolyArea` from
 `Meshes.jl`.
@@ -101,56 +100,44 @@ PolyArea
   └─ Ring((x: 0.34174 m, y: 0.5 m), ..., (x: 0.34174 m, y: 0.5 m))
 ```
 """
-function shape_area(name)
-    ring = shape_ring(name)
-    PolyArea(ring)
-end
+function shape_area end
 
 """
     shape_sample_outline(name, n)
 
-Returns a `2 ⨯ n` `HybridMatrix` of `n` points homogeneously sampled from the
+!!! info
+    Requires the [`Meshes.jl`](https://github.com/JuliaGeometry/Meshes.jl)
+    package being loaded.
+
+Returns a `2 ⨯ n` `Matrix` of `n` points homogeneously sampled from the
 outline of the shape with the given name.
 
 ```julia
 julia> shape_sample_outline("Bone-1", 10)
-2×10 HybridArrays.HybridMatrix{2, StaticArraysCore.Dynamic(), Float64, 2, Matrix{Float64}} with indices SOneTo(2)×Base.OneTo(10):
- 0.652387  0.476934  0.220565  0.358224  0.0707124  0.224358  0.446889  0.435535  0.538483  0.786873
- 0.765361  0.708831  0.167959  0.369937  0.100747   0.144465  0.661627  0.643784  0.812571  0.894025
+2×10 Matrix{Float64}:
+ 0.213944   0.0874572  0.695606  …  0.778814  0.681997
+ 0.0313239  0.0992228  0.753576     0.906329  0.955572
 ```
 """
-function shape_sample_outline(name, n)
-    ring = shape_ring(name)
-    points = sample(ring, HomogeneousSampling(n))
-    _point_iter_to_mat(points)
-end
+function shape_sample_outline end
 
 """
     shape_sample_inner(name, n)
 
-Returns a `2 ⨯ n` `HybridMatrix` of `n` points homogeneously sampled from the
+!!! info
+    Requires the [`Meshes.jl`](https://github.com/JuliaGeometry/Meshes.jl)
+    package being loaded.
+
+Returns a `2 ⨯ n` `Matrix` of `n` points homogeneously sampled from the
 interior of the shape with the given name.
 
 ```julia
 julia> shape_sample_inner("Bone-1", 10)
-2×10 HybridArrays.HybridMatrix{2, StaticArraysCore.Dynamic(), Float64, 2, Matrix{Float64}} with indices SOneTo(2)×Base.OneTo(10):
- 0.0915315  0.125075   0.751956  0.580064  0.780953  0.0356033  0.143631  0.0505262  0.337685  0.597154
- 0.177619   0.0742084  0.907282  0.955151  0.828131  0.141015   0.138244  0.150312   0.466503  0.809213
+2×10 Matrix{Float64}:
+ 0.0754321  0.727358  0.19444   …  0.645929  0.323449  0.638125
+ 0.241538   0.747493  0.188188     0.778322  0.370565  0.79197
 ```
 """
-function shape_sample_inner(name, n)
-    area = shape_area(name)
-    points = sample(area, HomogeneousSampling(n))
-    _point_iter_to_mat(points)
-end
-
-function _point_iter_to_mat(points)
-    stack(points) do point
-        (; x, y) = point.coords
-        tpl = ustrip.(u"m", (x, y))
-        HybridVector{2}([tpl...])
-    end
-end
-
+function shape_sample_inner end
 
 end # module The2DShapeStructureDataset

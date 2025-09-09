@@ -8,8 +8,8 @@ The2DShapeStructureDataset
 ```@docs
 shape_names()
 shape_coords(name)
-shape_ring(name)
-shape_area(name)
-shape_sample_outline(name, n)
-shape_sample_inner(name, n)
+shape_ring
+shape_area
+shape_sample_outline
+shape_sample_inner
 ```
